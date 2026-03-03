@@ -1,0 +1,44 @@
+```{r, echo = FALSE}
+terns = read.csv("data/2000-2023_ca_least_tern.csv")
+```
+
+# Grouping
+
+:::{.callout-note title="Learning Goals" collapse="false"}
+After this lesson, you should be able to:
+
+* Split data into groups and apply a function to each
+* Compute group statistics with the dplyr package's `group_by` and `summarize`
+  functions
+:::
+
+:::{.callout-important title="Required Packages"}
+This chapter uses the following packages:
+
+* dplyr
+
+@sec-packages explains how to install and load packages.
+:::
+
+
+## Grouping
+
+The dplyr package's `group_by` and `summarize` functions are analogous to
+`split` and purrr's map functions, but return the results in a data frame with
+one row for each category. In many cases, this is more convenient than a list
+or vector result.
+
+As an example, here's how to use `group_by` and `summarize` to compute the
+`total_nests` medians:
+
+```{r}
+library("dplyr")
+
+by_region = group_by(terns, region_3)
+summarize(by_region, median(total_nests, na.rm = TRUE))
+```
+
+The [dplyr documentation][dplyr] provides more details about how to use
+the `group_by` and `summarize` functions.
+
+[dplyr]: https://dplyr.tidyverse.org/

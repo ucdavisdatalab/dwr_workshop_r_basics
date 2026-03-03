@@ -16,10 +16,13 @@ book:
     - "index.qmd"
     - part: "Getting Started"
       chapters:
-        - "chapters/01_getting-started.qmd"
+        - "chapters/getting-started/01_getting-started.qmd"
+        - "chapters/getting-started/packages.qmd"
     - part: "Exploring Data"
       chapters:
-        - "chapters/03_exploring-data.qmd"
+        - "chapters/exploring-data/indexing.qmd"
+        - "chapters/exploring-data/visualization.qmd"
+        - "chapters/exploring-data/grouping.qmd"
     - part: "Data Structures & Types"
       chapters:
         - "chapters/02_data-structures.qmd"

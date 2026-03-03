@@ -7,6 +7,8 @@ terns = read.csv("data/2000-2023_ca_least_tern.csv")
 :::{.callout-note title="Learning Goals" collapse="false"}
 After this lesson, you should be able to:
 
+* Create vectors, including sequences
+* Identify whether a function is vectorized or not
 * Select the columns of a data frame
 * Describe when to use `[` versus `[[`
 * Filter the rows of a data frame
@@ -27,6 +29,228 @@ problems with the language. For tabular data, two kinds of indexing---selecting
 columns and filtering rows---are the foundation upon which all analyses rest.
 This chapter is an introduction to R's many operators and functions for
 indexing.
+
+
+## Vectors {#sec-vectors}
+
+A **vector** is a collection of values. Vectors are the fundamental unit of
+data in R, and you've already used them in the previous sections.
+
+For instance, each column in a data frame is a vector. So the `site_name`
+column in the California least terns data set (@sec-ca-least-terns) is a
+vector. Take a look at it now. You can use `head` to avoid printing too much.
+Set the second argument to `10` so that exactly 10 values are printed:
+
+```{r}
+head(terns$site_name, 10)
+```
+
+Like all vectors, this vector is **ordered**, which just means the values, or
+**elements**, have specific positions. The value of the 1st element is
+`r terns$site_name[[1]]`, the 2nd is `r terns$site_name[[2]]`, the 5th is
+`r terns$site_name[[5]]`, and so on.
+
+Notice that the elements of this vector are all strings. In R, the elements of
+a vector must all be the same type of data (we say the elements are
+**homogeneous**). A vector can contain integers, decimal numbers, strings, or
+any of several other types of data, but not a mix these all at once.
+
+The other columns in the least terns data frame are also vectors. For instance,
+the `year` column is a vector of integers:
+
+```{r}
+head(terns$year)
+```
+
+Vectors can contain any number of elements, including 0 or 1 element. Unlike
+mathematics, R does not distinguish between vectors and scalars (solitary
+values). As far as R is concerned, a solitary value, like `3`, is a vector with
+1 element.
+
+You can check the length of a vector (and other objects) with the `length`
+function:
+
+```{r}
+length(3)
+length("hello")
+length(terns$year)
+```
+
+Since the last of these is a column from the data frame `terns`, the length is
+the same as the number of rows in `terns`.
+
+
+### Creating Vectors
+
+Sometimes you'll want to create your own vectors. You can do this by
+concatenating several vectors together with the `c` function. It accepts any
+number of vector arguments, and combines them into a single vector:
+
+```{r}
+c(1, 2, 19, -3)
+c("hi", "hello")
+c(1, 2, c(3, 4))
+```
+
+If the arguments you pass to the `c` function have different data types, R will
+attempt to convert them to a common data type that preserves the information:
+
+```{r}
+c(1, "cool", 2.3)
+```
+
+@sec-implicit-coercion explains the rules for this conversion in more detail.
+
+The colon operator `:` creates vectors that contain sequences of integers. This
+is useful for creating "toy" data to test things on, and later we'll see that
+it's also important in several other contexts. Here are a few different
+sequences:
+
+```{r}
+1:3
+-3:5
+10:1
+```
+
+Beware that both endpoints are included in the sequence, even in sequences like
+`1:0`, and that the difference between elements is always `-1` or `1`. If you
+want more control over the generated sequence, use the `seq` function instead.
+
+
+### Indexing Vectors {#sec-indexing-vectors}
+
+You can access individual elements of a vector with the **indexing operator**
+`[` (also called the square bracket operator). The syntax is:
+
+```{r}
+#| eval: false
+VECTOR[INDEXES]
+```
+
+Here `INDEXES` is a vector of positions of elements you want to get or set.
+
+For example, let's make a vector with 5 elements and get the 2nd element:
+
+```{r}
+x = c(4, 8, 3, 2, 1)
+x[2]
+```
+
+Now let's get the 3rd and 1st element:
+
+```{r}
+x[c(3, 1)]
+```
+
+You can use the indexing operator together with the assignment operator to
+assign elements of a vector:
+
+```{r}
+x[3] = 0
+x
+```
+
+Indexing is among the most frequently used operations in R, so take some time
+to try it out with few different vectors and indexes. We'll revisit indexing in
+@sec-indexing to learn a lot more about it.
+
+
+### Vectorization {#sec-vectorization}
+
+Let's look at what happens if we call a mathematical function, like `sin`, on a
+vector:
+
+```{r}
+x = c(1, 3, 0, pi)
+sin(x)
+```
+
+This gives us the same result as if we had called the function separately on
+each element. That is, the result is the same as:
+
+```{r}
+c(sin(1), sin(3), sin(0), sin(pi))
+```
+
+Of course, the first version is much easier to type.
+
+Functions that take a vector argument and get applied element-by-element like
+this are said to be **vectorized**. Most functions in R are vectorized,
+especially math functions. Some examples include `sin`, `cos`, `tan`, `log`,
+`exp`, and `sqrt`.
+
+Functions that are not vectorized tend to be ones that combine or aggregate
+values in some way. For instance, the `sum`, `mean`, `median`, `length`, and
+`class` functions are not vectorized.
+
+A function can be vectorized across multiple arguments. This is easiest to
+understand in terms of the arithmetic operators. Let's see what happens if we
+add two vectors together:
+
+```{r}
+x = c(1, 2, 3, 4)
+y = c(-1, 7, 10, -10)
+x + y
+```
+
+The elements are paired up and added according to their positions. The other
+arithmetic operators are also vectorized:
+
+```{r}
+x - y
+x * y
+x / y
+```
+
+### Recycling {#sec-recycling}
+
+When a function is vectorized across multiple arguments, what happens if the
+vectors have different lengths? Whenever you think of a question like this as
+you're learning R, the best way to find out is to create some toy data and test
+it yourself. Let's try that now:
+
+```{r}
+x = c(1, 2, 3, 4)
+y = c(-1, 1)
+x + y
+```
+
+The elements of the shorter vector are **recycled** to match the length of the
+longer vector. That is, after the second element, the elements of `y` are
+repeated to make a vector with the same length as `x` (because `x` is longer),
+and then vectorized addition is carried out as usual.
+
+Here's what that looks like written down:
+
+```{.none}
+   1  2  3  4
++ -1  1 -1  1
+  -----------
+   0  3  2  5
+```
+
+If the length of the longer vector is not a multiple of the length of the
+shorter vector, R issues a warning, but still returns the result. The warning
+as meant as a reminder, because unintended recycling is a common source of
+bugs:
+
+```{r}
+x = c(1, 2, 3, 4, 5)
+y = c(-1, 1)
+x + y
+```
+
+Recycling might seem strange at first, but it's convenient if you want to use a
+specific value (or pattern of values) with a vector. For instance, suppose you
+want to multiply all the elements of a vector by `2`. Recycling makes this
+easy:
+
+```{r}
+2 * c(1, 2, 3)
+```
+
+When you use recycling, most of the time one of the arguments will be a scalar
+like this.
 
 
 ## More Than One Dimension
@@ -444,3 +668,37 @@ xor(TRUE, FALSE)
 xor(TRUE, TRUE)
 ```
 :::
+
+
+## Exercises
+
+
+### Exercise
+
+The `rep` function is another way to create a vector. Read the help file for
+the `rep` function.
+
+1. What does the `rep` function do to create a vector? Give an example.
+2. The `rep` function has parameters `times` and `each`. What does each do, and
+   how do they differ? Give examples for both.
+3. Can you set both of `times` and `each` in a single call to `rep`? If the
+   function raises an error, explain what the error message means. If the
+   function returns a result, explain how the result corresponds to the
+   arguments you chose.
+
+
+### Exercise
+
+1.  Create a new data frame from the least terns data with the following
+    characteristics:
+      * Each entry's year is between 2010 and 2019 (inclusive).
+      * Each entry reports at least 100 breeding pairs.
+      * The columns are `year`, `site_name`, `bp_min`, `bp_max`,
+        `total_nests`.
+
+    Use this data frame for the remaining questions.
+
+2.  Count the number of entries for each site. How many sites have at least 100
+    breeding pairs across all 10 years?
+
+3.  Which site-year combination has the highest number of nests?

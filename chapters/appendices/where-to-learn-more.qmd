@@ -1,4 +1,4 @@
-# Where to Learn More {.unnumbered}
+# Where to Learn More
 
 This reader provides an introduction to the basics of R, but there's lots more
 to learn!

@@ -18,10 +18,11 @@ book:
     - "chapters/02_data-structures.qmd"
     - "chapters/03_exploring-data.qmd"
     - "chapters/04_organizing_code.qmd"
-    - "chapters/05_appendix.qmd"
-    - "chapters/97_where-to-learn-more.qmd"
-    - "chapters/98_acknowledgements.qmd"
-    - "chapters/99_assessment.qmd"
+  appendices:
+    - "chapters/appendices/appendix.qmd"
+    - "chapters/appendices/where-to-learn-more.qmd"
+    - "chapters/appendices/acknowledgements.qmd"
+    - "chapters/appendices/assessment.qmd"
   repo-url: "https://github.com/ucdavisdatalab/workshop_r_basics"
   repo-actions: [issue, source]
   sidebar:

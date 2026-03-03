@@ -38,7 +38,7 @@ format:
       - text: |
           <style>
           .callout.callout-style-default .callout-body {
-            padding: 0 1.5rem .2rem;
+            padding: 0 1.5rem 0;
           }
           .cell-output-stdout {
             overflow-y: scroll;

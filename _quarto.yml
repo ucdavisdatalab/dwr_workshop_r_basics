@@ -14,9 +14,15 @@ book:
   date: now
   chapters:
     - "index.qmd"
-    - "chapters/01_getting-started.qmd"
-    - "chapters/02_data-structures.qmd"
-    - "chapters/03_exploring-data.qmd"
+    - part: "Getting Started"
+      chapters:
+        - "chapters/01_getting-started.qmd"
+    - part: "Exploring Data"
+      chapters:
+        - "chapters/03_exploring-data.qmd"
+    - part: "Data Structures & Types"
+      chapters:
+        - "chapters/02_data-structures.qmd"
     - part: "Organizing Code"
       chapters:
         - "chapters/organizing-code/writing-functions.qmd"

@@ -17,7 +17,10 @@ book:
     - "chapters/01_getting-started.qmd"
     - "chapters/02_data-structures.qmd"
     - "chapters/03_exploring-data.qmd"
-    - "chapters/04_organizing_code.qmd"
+    - part: "Organizing Code"
+      chapters:
+        - "chapters/organizing-code/writing-functions.qmd"
+        - "chapters/organizing-code/control-flow.qmd"
   appendices:
     - "chapters/appendices/appendix.qmd"
     - "chapters/appendices/where-to-learn-more.qmd"

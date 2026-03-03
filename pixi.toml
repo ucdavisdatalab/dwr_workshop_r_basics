@@ -25,6 +25,8 @@ r-knitr = ">=1.50,<2"
 r-rmarkdown = ">=2.30,<3"
 r-readxl = ">=1.4.5,<2"
 r-stringr = ">=1.6.0,<2"
+r-dplyr = ">=1.2.0,<2"
+r-purrr = ">=1.2.1,<2"
 
 [activation.env]
 # Make sure R only searches for packages within the Pixi environment.

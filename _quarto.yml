@@ -23,9 +23,9 @@ book:
         - "chapters/exploring-data/indexing.qmd"
         - "chapters/exploring-data/visualization.qmd"
         - "chapters/exploring-data/grouping.qmd"
-    - part: "Data Structures & Types"
+    - part: "Data Types & Structures"
       chapters:
-        - "chapters/02_data-structures.qmd"
+        - "chapters/data-types-structures/data-types-structures.qmd"
     - part: "Organizing Code"
       chapters:
         - "chapters/organizing-code/writing-functions.qmd"

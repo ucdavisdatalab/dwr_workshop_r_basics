@@ -2,11 +2,9 @@
 terns = read.csv("data/2000-2023_ca_least_tern.csv")
 ```
 
-# Data Structures
+# Data Types & Structures
 
-:::{.callout-note}
-##### Learning Goals
-
+:::{.callout-note title="Learning Goals"}
 After completing this chapter, learners should be able to:
 
 * Check the type and class of an object
@@ -23,18 +21,29 @@ term. Specifically, it begins with a deep dive into R's various data structures
 and data types, then explains a variety of ways to get and set their elements.
 
 
-## Data Types & Classes {#sec-data-types-classes}
+## Types & Classes {#sec-data-types-classes}
 
-Data can be categorized into different **types** based on sets of shared
-characteristics. For instance, statisticians tend to think about whether data
-are numeric or categorical:
+Different types of data require different approaches and analysis methods. For
+example, if your data are numbers, you can summarize them by computing a sum or
+an average. On the other hand, if your data are categories, like genres of
+music (rock, pop, classical, ...), you can't use these summarization methods
+and have to do something else.
 
-* numeric
-    + continuous (real or complex numbers)
-    + discrete (integers)
-* categorical
-    + nominal (categories with no ordering)
-    + ordinal (categories with some ordering)
+We can categorize data into **types** based on sets of shared characteristics.
+This makes it easier to reason about how to transform, analyze, and present the
+data. Some widely-understood data types are:
+
+* **Categorical**
+    + **Nominal** -- data separated into specific categories, with no order.
+      For example, hair color (red, brown, blonde, ...) is categorical.
+    + **Ordinal** -- data separated into specific categories, with an order.
+      For example, school level (elementary, middle, high, college) is ordinal.
+* **Numerical**
+    + **Discrete** -- integers, or a finite set of decimal numbers with no
+      values in between. Sometimes discrete values can also be treated as
+      ordinal. For example, month as a number (1, 2, ..., 12) is discrete.
+    + **Continuous** -- decimal numbers. There are no specific categories, but
+      there is an order. For example, height in inches is numerical.
 
 Of course, other types of data, like graphs (networks) and natural language
 (books, speech, and so on), are also possible. Categorizing data this way is
@@ -52,8 +61,8 @@ In R, data objects are categorized in two different ways:
    object has exactly one type. The `typeof` function returns the type of its
    argument.
 
-Of the two, classes tend to be more important than types. If you aren't sure
-what an object is, checking its classes should be the first thing you do.
+Of the two, classes are more important than types. If you aren't sure what an
+object is, checking its classes should be the first thing you do.
 
 The built-in classes you'll use all the time correspond to vectors and lists
 (which we'll learn more about in @sec-lists):
@@ -117,53 +126,31 @@ that represent more sophisticated data structures:
 
 | Class      | Description
 | :----      | :----------
-| function   | Functions
-| factor     | Categorical values
-| matrix     | Two-dimensional ordered collection of homogeneous elements
-| array      | Multi-dimensional ordered collection of homogeneous elements
-| data.frame | Data frames
+| function   | Function
+| data.frame | Data frame
+| matrix     | 2-dim ordered collection of homogeneous elements (@sec-matrices-arrays)
+| array      | $p$-dim ordered collection of homogeneous elements (@sec-matrices-arrays)
+| factor     | Vector of categorical values (@sec-factors)
 
 For these, the class is usually different from the type. We'll learn more about
 most of these later on.
-
-
-### Lists {#sec-lists}
-
-A **list** is an ordered data structure where the elements can have different
-types (they are **heterogeneous**). This differs from a vector, where the
-elements all have to have the same type, as we saw in @sec-vectors. The
-tradeoff is that most vectorized functions do not work with lists.
-
-You can make an ordinary list with the `list` function:
-
-```{r}
-x = list(1, c("hi", "bye"))
-class(x)
-typeof(x)
-```
-
-For ordinary lists, the type and the class are both `list`. In @sec-indexing,
-we'll learn how to get and set list elements, and in later sections we'll learn
-more about when and why to use lists.
-
-You've already seen one list, the `terns` data frame:
-
-```{r}
-class(terns)
-typeof(terns)
-```
-
-Under the hood, data frames are lists, and each column is a list element.
-Because the class is `data.frame` rather than `list`, R treats data frames
-differently from ordinary lists. This difference is apparent in how data frames
-are printed compared to ordinary lists.
 
 
 ### Implicit Coercion {#sec-implicit-coercion}
 
 R's types fall into a natural hierarchy of expressiveness:
 
-![R's hierarchy of types.](/images/types.png)
+:::{#fig-types}
+```{mermaid}
+flowchart LR
+  lgl(logical) --> int(integer)
+  int --> num(numeric)
+  num --> cmp(complex)
+  cmp --> chr(character)
+  chr --> lst(list)
+```
+R's hierarchy of types.
+:::
 
 Each type on the right is more expressive than the ones to its left. That is,
 with the convention that `FALSE` is `0` and `TRUE` is `1`, we can represent any
@@ -237,7 +224,41 @@ for understanding why a piece of code works (or doesn't work!). Here the
 implicit coercion happens in the third line.
 
 
-### Matrices & Arrays
+## Lists {#sec-lists}
+
+A **list** is an ordered data structure where the elements can have different
+types (they are **heterogeneous**). This differs from a vector, where the
+elements all have to have the same type, as we saw in @sec-vectors. The
+tradeoff is that most vectorized functions do not work with lists.
+
+You can make an ordinary list with the `list` function:
+
+```{r}
+x = list(1, c("hi", "bye"))
+class(x)
+typeof(x)
+```
+
+For ordinary lists, the type and the class are both `list`. In @sec-indexing,
+we'll learn how to get and set list elements, and in later sections we'll learn
+more about when and why to use lists.
+
+You've already seen one list, the `terns` data frame:
+
+```{r}
+class(terns)
+typeof(terns)
+```
+
+:::{.callout-note}
+Under the hood, data frames are lists, and each column is a list element.
+Because the class is `data.frame` rather than `list`, R treats data frames
+differently from ordinary lists. This difference is apparent in how data frames
+are printed compared to ordinary lists.
+:::
+
+
+## Matrices & Arrays {#sec-matrices-arrays}
 
 A **matrix** is the two-dimensional analogue of a vector. The elements, which
 are arranged into rows and columns, are ordered and homogeneous.
@@ -268,7 +289,7 @@ characteristics of arrays are almost identical to matrices, but the class of an
 array is always `array`.
 
 
-### Factors {#sec-factors}
+## Factors {#sec-factors}
 
 A feature is **categorical** if it measures a qualitative category. For
 example, the genres `rock`, `blues`, `alternative`, `folk`, `pop` are

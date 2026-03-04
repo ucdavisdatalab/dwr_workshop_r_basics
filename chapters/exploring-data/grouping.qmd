@@ -48,141 +48,140 @@ the `group_by` and `summarize` functions.
 
 ## Aggregation & Grouping
 
-{ref}`sec-summarizing-columns` showed how to compute the mean, minimum, and
-maximum values of a series. All of these functions **aggregate** the elements
-of the series, reducing them to a smaller number of values (usually one).
-Polars provides many different aggregation functions, which are [listed in the
-documentation][pl-agg].
-
-[pl-agg]: https://docs.pola.rs/api/python/stable/reference/expressions/aggregation.html
+@sec-summarizing-columns showed how to compute the mean, minimum, and maximum
+values of a column. All of these functions **aggregate** the elements of the
+series, reducing them to a smaller number of values (usually one).
 
 For example, to compute the median number of predator-related egg mortalities
 across all sites and years:
 
-```{code-cell}
-terns["pred_eggs"].median()
+```{r}
+median(terns$pred_eggs, na.rm = TRUE)
 ```
 
-With the `.select` (or `.with_columns`) method, there are two more ways you can
-do this:
+The dplyr package also provides a few different aggregation functions, which
+are described in the [documentation][dplyr]. Perhaps the most useful is the
+`summarize` function. To compute the median above with `summarize`:
 
-```{code-cell}
-terns.select(pl.col("pred_eggs").median())
+```{r}
+summarize(terns, median(pred_eggs, na.rm = TRUE))
 ```
 
-```{code-cell}
-terns.select(pl.median("pred_eggs"))
-```
+This is useful if you want to compute aggregates for multiple columns at once.
+For example:
 
-These forms are useful if you want to compute aggregates for multiple columns
-at once. For example:
-
-```{code-cell}
-terns.select(
-    pl.col(pl.Float64).exclude("year").median()
+```{r}
+summarize(
+  terns,
+  median(bp_min, na.rm = TRUE),
+  median(bp_max, na.rm = TRUE)
 )
 ```
 
 
-### Grouping
+## Summarizing Groups
 
-In {ref}`sec-categorical-data`, we wrote that the identifying characteristic of
+In @sec-categorical-data, we wrote that the identifying characteristic of
 categorical features is that their values are useful for dividing observations
-into groups. Now we're actually ready to do that. You can use the `.group_by`
-method to group rows in a data frame by one or more columns.
+into groups. Now we're actually ready to do that. You can use dplyr's
+`group_by` function to group rows in a data frame by one or more columns.
 
 
-To demonstrate the `.group_by` method, let's compute the median number of nests
-by region for the least terns data. We'll use the `region_3` column. After
-grouping with `.group_by`, you can use the `.agg` method to compute aggregates
-of columns (similar to using `.select`), and Polars will compute a separate
-result for each group:
+To demonstrate the `group_by` function, let's compute the median number of
+nests by region for the least terns data. We'll use the `region_3` column.
+After grouping with `group_by`, you can use the `summarize` function to compute
+summaries of columns, and dplyr will compute a separate result for each group:
 
-```{code-cell}
-terns.group_by("region_3").agg(pl.col("total_nests").median())
+```{r}
+by_region = group_by(terns, region_3)
+summarize(by_region, median(total_nests, na.rm = TRUE))
 ```
 
-Like `.select`, the `.agg` method supports computing on multiple columns. For
-example, suppose we also want the median number of breeding pairs, and want to
-compute the maximum for both features as well. We'll use the `.name.suffix`
-method to make sure each column in the result has a unique name:
+The `summarize` function supports computing on multiple columns. For example,
+suppose we also want the median number of breeding pairs, and want to compute
+the maximum for both features as well. We can use parameter names to give each
+summary statistic a unique, easy-to-type name:
 
-```{code-cell}
-cols = ["total_nests", "bp_max"]
-
-terns.group_by("region_3").agg(
-    pl.col(cols).median().name.suffix("_median"),
-    pl.col(cols).max().name.suffix("_max")
+```{r}
+summarize(
+  by_region,
+  med_total_nests = median(total_nests, na.rm = TRUE),
+  med_bp_max = median(bp_max, na.rm = TRUE),
+  max_total_nests = max(total_nests, na.rm = TRUE),
+  max_bp_max = max(bp_max, na.rm = TRUE)
 )
 ```
 
 Some aggregation functions only make sense when used with grouping. One is the
-`.first` method, which returns the first row in a group. The `.first` method is
-useful when all of the values in a group are the same, and you want to reduce
-the data to one row per group.
+`n` function, which returns the number of rows in a group. For example, one way
+to find all year and climate event combinations present in the least terns data
+is to run:
 
-For example, one way to find all year and climate event combinations present in
-the least terns data is to run:
-
-```{code-cell}
-cols = ["year", "event"]
-
-(
-    terns.group_by(cols).first()
-    .select(cols)
-    .sort(cols)
+```{r}
+summarize(
+  group_by(terns, year, event),
+  n()
 )
 ```
 
 From this result we can conclude that there is only one climate event for each
 year in the data set.
 
-For tasks like standardizing features on a per-group basis, it's necessary to
-compute aggregates on groups and then map them back to observations. Rather
-than using `.group_by` for this, you can use `.select` (or `.with_columns`) and
-the `.over` method. For example, to compute mean total nests for each year:
 
-```{code-cell}
-terns.select(
-    pl.col("year"),
-    pl.col("total_nests").mean().over("year")
+## Mutating Groups
+
+For tasks like standardizing features on a per-group basis, it's necessary to
+compute aggregates on groups and then map them back to observations. Use the
+`mutate` function for this rather than `summarize`. For example, to compute
+mean total nests for each year:
+
+```{r}
+by_year = group_by(terns, year)
+mutate(
+  by_year,
+  year,
+  mean_total_nests = mean(total_nests, na.rm = TRUE),
+  # Keep only the mentioned columns, to make the result easier to see.
+  .keep = "used"
 )
 ```
 
-This approach returns a data frame with the same number of rows as the original
-data frame, unlike the `.group_by` and `.agg` approach, which returns a data
+The `mutate` function returns a data frame with the same number of rows as the
+original data frame, unlike the `summarize` function, which returns a data
 frame with the same number of rows as there are groups.
 
-:::{tip}
-Use `.select` (or `.with_columns`) and `.over` if you want to compute grouped
-aggregates to use in further computations on the data frame. Use `.group_by`
-and `.agg` if you only want to compute grouped aggregates (for example, as a
-summary, to make a visualization, or to use in further computations that are
-not on the data frame).
+:::{.callout-tip}
+Use `summarize` if you want to compute grouped aggregates on their own. For
+example, you might use these as a summary, to make a visualization, or to use
+in further computations that are not on the original data frame.
+
+Use `mutate` if you want to compute grouped aggregates matched to the rows of
+the original data frame.
 :::
 
 
 ## Exercises
 
+
 ### Exercise
 
 1. Compute the total number of fledglings (with `fl_min`) for each year and
    region combination.
-2. Another way to present the data in {ref}`sec-example-bar-plot` is with a
-   line plot. Use the data from part 1 to make this plot with points for each
-   total and lines connecting the totals. Hint: find the appropriate geometries
-   in the ggplot2 or Plotnine documentation.
+2. Another way to present the data in @sec-example-bar-plot is with a line
+   plot. Use the data from part 1 to make this plot with points for each total
+   and lines connecting the totals. Hint: find the appropriate geometries in
+   the ggplot2 or Plotnine documentation.
+
 
 ### Exercise
 
 1. Compute the number of sites with no egg mortalities due to predation.
 2. Of those, how many had at least one fledgling?
 
+
 ### Exercise
 
 1. Compute the range (minimum and maximum) of `year` for each site.
 2. How many many sites have observations over the entire range of the data set
-   (2000 and 2004-2023)? Hint: use `.unique` and `.len` to find the number of
+   (2000 and 2004-2023)? Hint: use `unique` and `length` to find the number of
    unique years for each site.
-
-

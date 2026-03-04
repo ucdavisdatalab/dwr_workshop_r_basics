@@ -553,7 +553,7 @@ summary(terns)
 ```
 
 
-### Selecting Columns
+### Selecting Columns {#sec-working-with-files-selecting-columns}
 
 You can select an individual column from a data frame by name with `$`, the
 dollar sign operator. The syntax is:

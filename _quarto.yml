@@ -58,6 +58,9 @@ format:
             max-height: 30rem;
             margin-bottom: 0.75rem;
           }
+          #quarto-sidebar a.text-start {
+            font-variant: small-caps;
+          }
           </style>
   pdf: default
 

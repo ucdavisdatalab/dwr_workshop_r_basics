@@ -254,7 +254,7 @@ When you use recycling, most of the time one of the arguments will be a scalar
 like this.
 
 
-## More Than One Dimension
+## Indexing in Two Dimensions
 
 @sec-indexing-vectors introduced the indexing (or square bracket) operator
 `[` as a way to get and set the elements of a vector. You can also use the

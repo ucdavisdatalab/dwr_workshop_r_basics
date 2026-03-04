@@ -16,8 +16,8 @@ book:
     - "index.qmd"
     - part: "Getting Started"
       chapters:
-        - "chapters/getting-started/01_getting-started.qmd"
-        - "chapters/getting-started/packages.qmd"
+        - "chapters/getting-started/getting-started.qmd"
+        - "chapters/getting-started/working-with-files.qmd"
     - part: "Exploring Data"
       chapters:
         - "chapters/exploring-data/indexing.qmd"

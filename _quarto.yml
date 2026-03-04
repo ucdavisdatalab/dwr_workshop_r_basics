@@ -31,6 +31,7 @@ book:
         - "chapters/organizing-code/writing-functions.qmd"
         - "chapters/organizing-code/control-flow.qmd"
   appendices:
+    - "chapters/appendices/file-systems.qmd"
     - "chapters/appendices/appendix.qmd"
     - "chapters/appendices/where-to-learn-more.qmd"
     - "chapters/appendices/acknowledgements.qmd"

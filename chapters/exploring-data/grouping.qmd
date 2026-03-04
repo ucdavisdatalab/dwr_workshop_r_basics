@@ -42,3 +42,147 @@ The [dplyr documentation][dplyr] provides more details about how to use
 the `group_by` and `summarize` functions.
 
 [dplyr]: https://dplyr.tidyverse.org/
+
+
+
+
+## Aggregation & Grouping
+
+{ref}`sec-summarizing-columns` showed how to compute the mean, minimum, and
+maximum values of a series. All of these functions **aggregate** the elements
+of the series, reducing them to a smaller number of values (usually one).
+Polars provides many different aggregation functions, which are [listed in the
+documentation][pl-agg].
+
+[pl-agg]: https://docs.pola.rs/api/python/stable/reference/expressions/aggregation.html
+
+For example, to compute the median number of predator-related egg mortalities
+across all sites and years:
+
+```{code-cell}
+terns["pred_eggs"].median()
+```
+
+With the `.select` (or `.with_columns`) method, there are two more ways you can
+do this:
+
+```{code-cell}
+terns.select(pl.col("pred_eggs").median())
+```
+
+```{code-cell}
+terns.select(pl.median("pred_eggs"))
+```
+
+These forms are useful if you want to compute aggregates for multiple columns
+at once. For example:
+
+```{code-cell}
+terns.select(
+    pl.col(pl.Float64).exclude("year").median()
+)
+```
+
+
+### Grouping
+
+In {ref}`sec-categorical-data`, we wrote that the identifying characteristic of
+categorical features is that their values are useful for dividing observations
+into groups. Now we're actually ready to do that. You can use the `.group_by`
+method to group rows in a data frame by one or more columns.
+
+
+To demonstrate the `.group_by` method, let's compute the median number of nests
+by region for the least terns data. We'll use the `region_3` column. After
+grouping with `.group_by`, you can use the `.agg` method to compute aggregates
+of columns (similar to using `.select`), and Polars will compute a separate
+result for each group:
+
+```{code-cell}
+terns.group_by("region_3").agg(pl.col("total_nests").median())
+```
+
+Like `.select`, the `.agg` method supports computing on multiple columns. For
+example, suppose we also want the median number of breeding pairs, and want to
+compute the maximum for both features as well. We'll use the `.name.suffix`
+method to make sure each column in the result has a unique name:
+
+```{code-cell}
+cols = ["total_nests", "bp_max"]
+
+terns.group_by("region_3").agg(
+    pl.col(cols).median().name.suffix("_median"),
+    pl.col(cols).max().name.suffix("_max")
+)
+```
+
+Some aggregation functions only make sense when used with grouping. One is the
+`.first` method, which returns the first row in a group. The `.first` method is
+useful when all of the values in a group are the same, and you want to reduce
+the data to one row per group.
+
+For example, one way to find all year and climate event combinations present in
+the least terns data is to run:
+
+```{code-cell}
+cols = ["year", "event"]
+
+(
+    terns.group_by(cols).first()
+    .select(cols)
+    .sort(cols)
+)
+```
+
+From this result we can conclude that there is only one climate event for each
+year in the data set.
+
+For tasks like standardizing features on a per-group basis, it's necessary to
+compute aggregates on groups and then map them back to observations. Rather
+than using `.group_by` for this, you can use `.select` (or `.with_columns`) and
+the `.over` method. For example, to compute mean total nests for each year:
+
+```{code-cell}
+terns.select(
+    pl.col("year"),
+    pl.col("total_nests").mean().over("year")
+)
+```
+
+This approach returns a data frame with the same number of rows as the original
+data frame, unlike the `.group_by` and `.agg` approach, which returns a data
+frame with the same number of rows as there are groups.
+
+:::{tip}
+Use `.select` (or `.with_columns`) and `.over` if you want to compute grouped
+aggregates to use in further computations on the data frame. Use `.group_by`
+and `.agg` if you only want to compute grouped aggregates (for example, as a
+summary, to make a visualization, or to use in further computations that are
+not on the data frame).
+:::
+
+
+## Exercises
+
+### Exercise
+
+1. Compute the total number of fledglings (with `fl_min`) for each year and
+   region combination.
+2. Another way to present the data in {ref}`sec-example-bar-plot` is with a
+   line plot. Use the data from part 1 to make this plot with points for each
+   total and lines connecting the totals. Hint: find the appropriate geometries
+   in the ggplot2 or Plotnine documentation.
+
+### Exercise
+
+1. Compute the number of sites with no egg mortalities due to predation.
+2. Of those, how many had at least one fledgling?
+
+### Exercise
+
+1. Compute the range (minimum and maximum) of `year` for each site.
+2. How many many sites have observations over the entire range of the data set
+   (2000 and 2004-2023)? Hint: use `.unique` and `.len` to find the number of
+   unique years for each site.
+
+

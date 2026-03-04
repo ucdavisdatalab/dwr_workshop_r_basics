@@ -10,6 +10,11 @@ After this lesson, you should be able to:
 * Inspect the structure of a data frame
 :::
 
+This chapter will help you get started working with files in R. First, we
+explain how to save (and load) your code, so that you can work on it
+incrementally and share it with colleagues. After that, we explain how to read
+a dataset from a file into R.
+
 
 ## Saving & Loading Code
 
@@ -474,7 +479,7 @@ You'll learn more about classes in @sec-data-types-classes, but for now you can
 use this function to identify data frames.
 
 
-## Inspecting a Data Frame {#sec-data-frames}
+## Inspecting a Data Frame {#sec-inspecting-data-frame}
 
 Similar to how the `head` function shows the first six rows of a data frame,
 the `tail` function shows the last six:

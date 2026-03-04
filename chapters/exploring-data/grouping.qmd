@@ -20,6 +20,10 @@ This chapter uses the following packages:
 @sec-packages explains how to install and load packages.
 :::
 
+This chapter explains how to use the dplyr package to summarize columns and
+groups within data frames. This is a critical skill in data analysis, and a
+building block for more complicated methods.
+
 
 ## Summarizing Columns
 
@@ -112,7 +116,7 @@ summarize(
 ```
 
 From this result we can conclude that there is only one climate event for each
-year in the data set.
+year in the dataset.
 
 
 ## Mutating Groups
@@ -169,6 +173,6 @@ the original data frame.
 ### Exercise
 
 1. Compute the range (minimum and maximum) of `year` for each site.
-2. How many many sites have observations over the entire range of the data set
+2. How many many sites have observations over the entire range of the dataset
    (2000 and 2004-2023)? Hint: use `unique` and `length` to find the number of
    unique years for each site.

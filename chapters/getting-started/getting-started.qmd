@@ -11,6 +11,12 @@ After this lesson, you should be able to:
 * Get a list of loaded packages
 :::
 
+This chapter is an introduction the R programming language and programming in
+general. We explain how to write, run, and get help with R code. The examples,
+which are meant for following along, demonstrate several important programming
+concepts. We also introduce RStudio, an editor for R code, and explain how to
+how to install packages, R code developed by the community for anyone to use.
+
 
 ## Why R?
 

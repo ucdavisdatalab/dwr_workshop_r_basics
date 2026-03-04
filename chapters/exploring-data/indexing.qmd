@@ -38,9 +38,9 @@ A **vector** is a collection of values. Vectors are the fundamental unit of
 data in R, and you've already used them in the previous sections.
 
 For instance, each column in a data frame is a vector. So the `site_name`
-column in the California least terns data set (@sec-ca-least-terns) is a
-vector. Take a look at it now. You can use `head` to avoid printing too much.
-Set the second argument to `10` so that exactly 10 values are printed:
+column in the California least terns dataset (@sec-ca-least-terns) is a vector.
+Take a look at it now. You can use `head` to avoid printing too much. Set the
+second argument to `10` so that exactly 10 values are printed:
 
 ```{r}
 head(terns$site_name, 10)
@@ -340,8 +340,8 @@ think about is whether you want to select just one column or multiple columns.
 
 ### One Column {#sec-one-column}
 
-The dollar sign operator `$`, introduced in @sec-inspecting-a-data-frame, is
-one way to select a single column from a data frame. For example, to select the
+The dollar sign operator `$`, introduced in @sec-inspecting-data-frame, is one
+way to select a single column from a data frame. For example, to select the
 `total_nests` column from the least terns dataset:
 
 ```{r}

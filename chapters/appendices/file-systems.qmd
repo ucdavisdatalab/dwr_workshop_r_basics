@@ -8,8 +8,8 @@ After this lesson, you should be able to:
 :::
 
 This chapter is a review of how files on a computer work. You’ll need to
-understand this in order to read a data set from a file, and it’s also
-important for finding your saved notebooks and modules later.
+understand this in order to read a dataset from a file, and it’s also important
+for finding your saved notebooks and modules later.
 
 
 ## File Systems

@@ -23,7 +23,11 @@ This chapter uses the following packages:
 :::
 
 In this chapter, you'll learn how to efficiently explore and summarize data
-with visualizations.
+with visualizations. We start with an overview of tools you can use to make
+visualizations in R, and then introduce the ggplot2 package, which is the focus
+for the rest of the chapter. Near the end of the chapter, we provide some
+guidelines for making high-quality visualizations suitable for sharing with
+others.
 
 
 ## The Visualization Landscape

@@ -11,6 +11,7 @@ book:
   author:
     - "Nick Ulle"
     - "Wesley Brooks"
+  description: "Reader for UC Davis DataLab's R Basics workshop series."
   date: now
   chapters:
     - "index.qmd"
@@ -38,8 +39,14 @@ book:
     # - "chapters/appendices/assessment.qmd"
   repo-url: "https://github.com/ucdavisdatalab/workshop_r_basics"
   repo-actions: [issue, source]
+  site-url: "https://ucdavisdatalab.github.io/workshop_r_basics"
+  favicon: "/images/datalab-logo_square_150x150.png"
+  image: "/images/datalab-logo_opengraph_1200x630.png"
+  image-alt: "The logo of the UC Davis DataLab."
+  open-graph: true
+  twitter-card: true
   sidebar:
-    logo: "images/datalab-logo-full-color-rgb-1.png"
+    logo: "/images/datalab-logo-full-color-rgb.png"
     logo-alt: "The logo of the UC Davis DataLab."
     logo-href: "https://datalab.ucdavis.edu/"
 

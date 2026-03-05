@@ -38,6 +38,7 @@ book:
     # - "chapters/appendices/assessment.qmd"
   repo-url: "https://github.com/ucdavisdatalab/workshop_r_basics"
   repo-actions: [issue, source]
+  favicon: "/images/datalab-logo_square_150x150.png"
   sidebar:
     logo: "/images/datalab-logo-full-color-rgb.png"
     logo-alt: "The logo of the UC Davis DataLab."

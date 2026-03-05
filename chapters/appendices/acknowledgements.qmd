@@ -1,4 +1,4 @@
-# Acknowledgements {.unnumbered}
+# Acknowledgements
 
 Sincere thanks to the rest of the DataLab team, for support and many thoughtful
 discussions about data science!

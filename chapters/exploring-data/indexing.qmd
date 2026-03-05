@@ -1,0 +1,764 @@
+```{r, echo = FALSE}
+terns = read.csv("data/2000-2023_ca_least_tern.csv")
+```
+
+# Indexing {#sec-indexing}
+
+:::{.callout-note title="Learning Goals" collapse="false"}
+After this lesson, you should be able to:
+
+* Create vectors, including sequences
+* Identify whether a function is vectorized or not
+* Select the columns of a data frame
+* Describe when to use `[` versus `[[`
+* Filter the rows of a data frame
+* Check (in)equality of values
+* Negate or combine conditions with logic operators
+:::
+
+:::{.callout-important title="Required Packages"}
+This chapter uses the following packages:
+
+* dplyr
+
+@sec-packages explains how to install and load packages.
+:::
+
+Indexing refers to getting and setting the elements of a data structure.
+Indexing is a fundamental operation in R, key to reasoning about how to solve
+problems with the language. For tabular data, two kinds of indexing---selecting
+columns and filtering rows---are the foundation upon which all analyses rest.
+This chapter is an introduction to R's many operators and functions for
+indexing.
+
+
+## Vectors {#sec-vectors}
+
+A **vector** is a collection of values. Vectors are the fundamental unit of
+data in R, and you've already used them in the previous sections.
+
+For instance, each column in a data frame is a vector. So the `site_name`
+column in the California least terns dataset (@sec-ca-least-terns) is a vector.
+Take a look at it now. You can use `head` to avoid printing too much. Set the
+second argument to `10` so that exactly 10 values are printed:
+
+```{r}
+head(terns$site_name, 10)
+```
+
+Like all vectors, this vector is **ordered**, which just means the values, or
+**elements**, have specific positions. The value of the 1st element is
+`r terns$site_name[[1]]`, the 2nd is `r terns$site_name[[2]]`, the 5th is
+`r terns$site_name[[5]]`, and so on.
+
+Notice that the elements of this vector are all strings. In R, the elements of
+a vector must all be the same type of data (we say the elements are
+**homogeneous**). A vector can contain integers, decimal numbers, strings, or
+any of several other types of data, but not a mix these all at once.
+
+The other columns in the least terns data frame are also vectors. For instance,
+the `year` column is a vector of integers:
+
+```{r}
+head(terns$year)
+```
+
+Vectors can contain any number of elements, including 0 or 1 element. Unlike
+mathematics, R does not distinguish between vectors and scalars (solitary
+values). As far as R is concerned, a solitary value, like `3`, is a vector with
+1 element.
+
+You can check the length of a vector (and other objects) with the `length`
+function:
+
+```{r}
+length(3)
+length("hello")
+length(terns$year)
+```
+
+Since the last of these is a column from the data frame `terns`, the length is
+the same as the number of rows in `terns`.
+
+
+### Creating Vectors
+
+Sometimes you'll want to create your own vectors. You can do this by
+concatenating several vectors together with the `c` function. It accepts any
+number of vector arguments, and combines them into a single vector:
+
+```{r}
+c(1, 2, 19, -3)
+c("hi", "hello")
+c(1, 2, c(3, 4))
+```
+
+If the arguments you pass to the `c` function have different data types, R will
+attempt to convert them to a common data type that preserves the information:
+
+```{r}
+c(1, "cool", 2.3)
+```
+
+@sec-implicit-coercion explains the rules for this conversion in more detail.
+
+The colon operator `:` creates vectors that contain sequences of integers. This
+is useful for creating "toy" data to test things on, and later we'll see that
+it's also important in several other contexts. Here are a few different
+sequences:
+
+```{r}
+1:3
+-3:5
+10:1
+```
+
+Beware that both endpoints are included in the sequence, even in sequences like
+`1:0`, and that the difference between elements is always `-1` or `1`. If you
+want more control over the generated sequence, use the `seq` function instead.
+
+
+### Indexing Vectors {#sec-indexing-vectors}
+
+You can access individual elements of a vector with the **indexing operator**
+`[` (also called the square bracket operator). The syntax is:
+
+```{r}
+#| eval: false
+VECTOR[INDEXES]
+```
+
+Here `INDEXES` is a vector of positions of elements you want to get or set.
+
+For example, let's make a vector with 5 elements and get the 2nd element:
+
+```{r}
+x = c(4, 8, 3, 2, 1)
+x[2]
+```
+
+Now let's get the 3rd and 1st element:
+
+```{r}
+x[c(3, 1)]
+```
+
+You can use the indexing operator together with the assignment operator to
+assign elements of a vector:
+
+```{r}
+x[3] = 0
+x
+```
+
+Indexing is among the most frequently used operations in R, so take some time
+to try it out with few different vectors and indexes. We'll revisit indexing in
+@sec-indexing to learn a lot more about it.
+
+
+### Vectorization {#sec-vectorization}
+
+Let's look at what happens if we call a mathematical function, like `sin`, on a
+vector:
+
+```{r}
+x = c(1, 3, 0, pi)
+sin(x)
+```
+
+This gives us the same result as if we had called the function separately on
+each element. That is, the result is the same as:
+
+```{r}
+c(sin(1), sin(3), sin(0), sin(pi))
+```
+
+Of course, the first version is much easier to type.
+
+Functions that take a vector argument and get applied element-by-element like
+this are said to be **vectorized**. Most functions in R are vectorized,
+especially math functions. Some examples include `sin`, `cos`, `tan`, `log`,
+`exp`, and `sqrt`.
+
+Functions that are not vectorized tend to be ones that combine or aggregate
+values in some way. For instance, the `sum`, `mean`, `median`, `length`, and
+`class` functions are not vectorized.
+
+A function can be vectorized across multiple arguments. This is easiest to
+understand in terms of the arithmetic operators. Let's see what happens if we
+add two vectors together:
+
+```{r}
+x = c(1, 2, 3, 4)
+y = c(-1, 7, 10, -10)
+x + y
+```
+
+The elements are paired up and added according to their positions. The other
+arithmetic operators are also vectorized:
+
+```{r}
+x - y
+x * y
+x / y
+```
+
+### Recycling {#sec-recycling}
+
+When a function is vectorized across multiple arguments, what happens if the
+vectors have different lengths? Whenever you think of a question like this as
+you're learning R, the best way to find out is to create some toy data and test
+it yourself. Let's try that now:
+
+```{r}
+x = c(1, 2, 3, 4)
+y = c(-1, 1)
+x + y
+```
+
+The elements of the shorter vector are **recycled** to match the length of the
+longer vector. That is, after the second element, the elements of `y` are
+repeated to make a vector with the same length as `x` (because `x` is longer),
+and then vectorized addition is carried out as usual.
+
+Here's what that looks like written down:
+
+```{.none}
+   1  2  3  4
++ -1  1 -1  1
+  -----------
+   0  3  2  5
+```
+
+If the length of the longer vector is not a multiple of the length of the
+shorter vector, R issues a warning, but still returns the result. The warning
+as meant as a reminder, because unintended recycling is a common source of
+bugs:
+
+```{r}
+x = c(1, 2, 3, 4, 5)
+y = c(-1, 1)
+x + y
+```
+
+Recycling might seem strange at first, but it's convenient if you want to use a
+specific value (or pattern of values) with a vector. For instance, suppose you
+want to multiply all the elements of a vector by `2`. Recycling makes this
+easy:
+
+```{r}
+2 * c(1, 2, 3)
+```
+
+When you use recycling, most of the time one of the arguments will be a scalar
+like this.
+
+
+## Indexing in Two Dimensions
+
+@sec-indexing-vectors introduced the indexing (or square bracket) operator
+`[` as a way to get and set the elements of a vector. You can also use the
+indexing operator with many other data structures, such as data frames, lists,
+matrices, and arrays.
+
+Consider data frames. A data frame is two-dimensional: it has rows and columns.
+In order to describe the exact position of an element in a data frame, we need
+to specify both a row index and a column index. You can still use the indexing
+operator `[` to get and set elements, but now it takes two arguments:
+
+```{r}
+#| eval: false
+DATA[ROW_INDEXES, COLUMN_INDEXES]
+```
+
+For example, to get the value at row 1 and column 2 in the California least
+terns data (@sec-ca-least-terns), you can write:
+
+```{r}
+terns[1, 2]
+```
+
+If you swap the order of the indexes, you get the value at row 2 and column 1
+instead:
+
+```{r}
+terns[2, 1]
+```
+
+As with indexing vectors, when indexing a data frame you can also:
+
+* Use a vector as an index to get multiple elements.
+* Leave an index blank to get everything in that dimension.
+* Use negative indexes to omit rows or columns.
+* Combine indexing with assignment to set elements.
+
+
+Let's look at examples of the first two. Suppose we want to get elements from
+multiple rows and columns. Here's the code to get elements from the first 3
+rows in columns 2 and 7 of the least terns data:
+
+```{r}
+terns[1:3, c(2, 7)]
+```
+
+Now suppose we want to get the elements from rows 3, 5, and 7 in all columns.
+Then you can write:
+
+```{r}
+terns[c(3, 5, 7), ]
+```
+
+By leaving the column index blank, you're telling R to select all of the
+columns. Likewise, you can leave the row index blank to select all of the rows.
+
+:::{.callout-note}
+You can also use the indexing operator `[` with data structures that have more
+than two dimensons. Maybe you can guess the syntax:
+
+```{r}
+#| eval: false
+DATA[DIM1_INDEXES, DIM2_INDEXES, DIM3_INDEXES, ...]
+```
+
+You won't encounter any data structures with more than two dimensions in this
+course, but you might someday.
+:::
+
+
+## Selecting Columns
+
+In order to work with tabular data, you need to know how to **select** (or get)
+columns. Most of the time, it's best to select columns by name. Doing so makes
+code easier to understand, since the reader doesn't have to memorize the
+positions of the columns. It can also make code more reliable, since the code
+will still work even if the positions of the columns change.
+
+This section explains several different ways to select columns and how to
+choose which one to use in any given situation. Generally, the first thing to
+think about is whether you want to select just one column or multiple columns.
+
+
+### One Column {#sec-one-column}
+
+The dollar sign operator `$`, introduced in @sec-inspecting-data-frame, is one
+way to select a single column from a data frame. For example, to select the
+`total_nests` column from the least terns dataset:
+
+```{r}
+terns$total_nests
+```
+
+The dollar sign operator always selects the column by name (not position).
+
+Another way to select a single column is with the **extraction operator** `[[`
+(also called the double square bracket operator). The column name must be
+quoted and goes inside the brackets. For instance:
+
+```{r}
+terns[["total_nests"]]
+```
+
+The double square bracket operator is helpful if you want to select a column
+with a name you've stored in a variable:
+
+```{r}
+my_column = "site_name"
+terns[[my_column]]
+```
+
+The double square bracket operator is also important for getting and setting
+elements of lists (@sec-lists). Unlike the dollar sign operator, it can also
+get columns by position:
+
+```{r}
+terns[[1]]
+```
+
+Most of the time, you should use the dollar sign operator when you want to get
+a single column.
+
+:::{.callout-tip}
+Quotes are optional with the dollar sign operator. So another way to get the
+`total_nests` column is:
+
+```{r}
+#| eval: false
+terns$"total_nests"
+```
+
+Use quotes if you want to get a column whose name contains spaces or other
+special characters. For all other cases, quotes are not necessary.
+:::
+
+
+### Multiple Columns
+
+The dollar sign operator `$` and double square bracket operator `[[` can only
+get one column of a data frame at a time, and they always return columns as
+vectors. This is useful when we want to compute on just one column, because
+most functions (especially math and statistics functions) require vector
+arguments.
+
+Sometimes we'll want to get multiple columns from a data frame. Imagine a data
+frame with 300 columns, but only 5 that are relevant to your research question.
+Getting rid of the extra columns makes the data easier to inspect and might
+make some computations faster. When you select multiple columns from a data
+frame, the result is also a data frame.
+
+One way to select multiple columns is with the indexing operator `[`. If you
+use the indexing operator on a data frame and only provide one index, R will
+select columns. For example, to select the `site_name` and `year` columns from
+the least terns dataset:
+
+```{r}
+terns[c("site_name", "year")]
+```
+
+:::{.callout-warning}
+In R, omitting an argument is different from leaving the argument blank. So
+these two expressions do different things despite looking similar:
+
+```{r}
+#| eval: false
+terns[c("site_name", "year")]
+```
+
+```{r}
+#| eval: false
+terns[c("site_name", "year"), ]
+```
+
+The first selects the `site_name` and `year` columns. The second selects the
+`site_name` and `year` rows (which causes an error, since the least terns
+dataset doesn't have row names).
+
+There's one more possibility:
+
+```{r}
+#| eval: false
+terns[, c("site_name", "year")]
+```
+
+Like the first expression, this selects the `site_name` and `year` columns. You
+can write the code either way. Some people prefer the first expression because
+it's shorter, while others prefer this expression because it makes it clear
+that `terns` is two-dimensional.
+:::
+
+You can select whatever combination of columns you want with the indexing
+operator, but it's somewhat inconvenient if you need to select a lot of
+columns, because you typically have to type out all of their names. For
+example, suppose we want to select all of the columns in the least terns
+dataset whose name starts with `nonpred_` (these are mortalities caused by
+something other than predation).
+
+The [dplyr][] package is a collection of functions that make working with data
+frames more convenient. Install and load the package if you want to follow
+along with this example:
+
+[dplyr]: https://dplyr.tidyverse.org/
+
+```{r}
+# install.packages("dplyr")
+library("dplyr")
+```
+
+Remember that you only need to install each package once.
+
+The dplyr package's `select` function selects columns from a data frame. Unlike
+most of R's built-in functions, the functions in dplyr don't require quotes
+around column names. To select the `site_name` and `year` columns from the
+least terns dataset, you can write:
+
+```{r}
+select(terns, site_name, year)
+```
+
+The advantage of `select` over the indexing operator `[` is that it provides
+concise ways to a lot of columns. For instance, to select all of the columns
+whose names begin with `nonpred_`, you can write:
+
+```{r}
+select(terns, starts_with("nonpred_"))
+```
+
+You can select the same columns with the indexing operator, but you'd either
+have to type out all of their names or use a more complicated expression.
+
+Use the indexing operator when you only need to select a few columns. Use
+dplyr's `select` function when you need to select lots of columns that follow
+some kind of pattern. The [dplyr documentation][dplyr] provides more details
+about how to use the `select` function.
+
+
+## Comparison Operators {#sec-comparisons}
+
+Besides arithmetic, you can also use R to compare values. Programming tasks
+often involve comparing values. Use **comparison operators** to do so:
+
+* `<` for "less than"
+* `>` for "greater than"
+* `<=` for "less than or equal to"
+* `>=` for "greater than or equal to"
+* `==` for "equal to"
+* `!=` for "not equal to"
+
+Notice that the "equal to" operator is two equal signs. This is to distinguish
+it from the assignment operator `=`.
+
+Let's look at a few examples:
+```{r}
+1.5 < 3
+"a" > "b"
+pi == 3.14
+"hi" == 'hi'
+```
+
+When you make a comparison, R returns a **logical** value, `TRUE` or `FALSE`,
+to indicate the result. Logical values are not the same as strings, so they are
+not quoted.
+
+Logical values are values, so you can use them in other computations. For
+example:
+
+```{r}
+TRUE
+TRUE == FALSE
+```
+
+@sec-logic describes more ways to use and combine logical values.
+
+:::{.callout-warning}
+Some of R's equality operators return `TRUE` even when comparing two different
+types of data:
+
+```{r}
+"1" == 1
+"TRUE" <= TRUE
+"FALSE" <= TRUE
+```
+
+@sec-implicit-coercion explains why this happens, and
+@sec-more-about-comparisons explains several other ways to compare values.
+:::
+
+
+## Filtering Rows
+
+In addition to selecting columns, you also need to know how to **filter** rows
+in order to work with tabular data. In this context, to "filter" is to get a
+subset of rows that satisfy a condition. As a motivating example, suppose we
+want to get all of the rows in the least terns dataset that correspond to the
+Los Angeles Harbor (`LA HARBOR`) site.
+
+The indexing operator `[` is one way to filter the rows of a data frame. The
+first step is to translate the condition on the rows into code. To test whether
+rows correspond to Los Angeles Harbor, we can write:
+
+```{r}
+terns$site_name == "LA HARBOR"
+```
+
+This returns a vector of logical (`TRUE` and `FALSE`) values. Now that we have
+the code for the condition, we can use indexing to get rows where the condition
+is `TRUE`:
+
+```{r}
+terns[terns$site_name == "LA HARBOR", ]
+```
+
+@sec-logic describes various operators and functions you can use to write more
+complicated conditions.
+
+Notice that in the condition, we had to write `terns$site_name` rather than
+just the column name `site_name`. We have to specify that we mean a column in
+`terns` because the indexing operator doesn't make any assumptions about what
+is or isn't a column name. But most of the time, we filter rows by testing
+conditions on the columns. Typing the name of the data frame (for example,
+`terns$`) in front of every column name makes writing complicated conditions
+tedious.
+
+The dplyr package's `filter` function is another way to filter the rows of a
+data frame. By assuming that names refer to column names, `filter` makes
+writing conditions less tedious. The first argument to `filter` is the data
+frame to filter, while the second is the condition. Here's how to get the Los
+Angeles Harbor rows from the least terns dataset:
+
+```{r}
+filter(terns, site_name == "LA HARBOR")
+```
+
+You can pass additional conditions to `filter` as additional arguments. All of
+them must be satisfied (`TRUE`) for a row to be kept.
+
+:::{.callout-note}
+R's built-in `subset` function is similar to and might have inspired dplyr's
+`filter` function. Here's how to use it to get all of the Los Angeles Harbor
+rows:
+
+```{r}
+#| eval: false
+subset(terns, site_name == "LA HARBOR")
+```
+
+The `subset` function is a good alternative if you prefer not to use dplyr.
+:::
+
+Both the indexing operator and dplyr's `filter` function are good ways to
+filter rows in a data frame. The indexing operator has the advantage that you
+can simultaneously use it to select columns by filling in the second argument.
+On the other hand, the `filter` function makes complicated conditions easier to
+type and read---this might seem like a small advantage, but code clarity is
+important.
+
+
+## Logic Operators {#sec-logic}
+
+All of the conditions we've seen so far have been written in terms of a single
+test. If you want to use more sophisticated conditions, R provides operators to
+negate and combine logical vectors. These operators are useful for working with
+logical vectors even outside the context of indexing.
+
+
+### Negation
+
+The **NOT operator** `!` converts `TRUE` to `FALSE` and `FALSE` to `TRUE`:
+```{r}
+x = c(TRUE, FALSE, TRUE, TRUE, NA)
+x
+!x
+```
+
+You can use `!` with a condition:
+```{r}
+y = c("hi", "hello")
+!(y == "hi")
+```
+
+The NOT operator is vectorized.
+
+
+### Combinations
+
+R also has operators for combining logical values.
+
+The **AND operator** `&` returns `TRUE` only when both arguments are `TRUE`.
+Here are some examples:
+
+```{r}
+FALSE & FALSE
+TRUE & FALSE
+FALSE & TRUE
+TRUE & TRUE
+c(TRUE, FALSE, TRUE) & c(TRUE, TRUE, FALSE)
+```
+
+The **OR operator** `|` returns `TRUE` when at least one argument is `TRUE`.
+Let's see some examples:
+
+```{r}
+FALSE | FALSE
+TRUE | FALSE
+FALSE | TRUE
+TRUE | TRUE
+c(TRUE, FALSE) | c(TRUE, TRUE)
+```
+
+The combination operators are vectorized.
+
+:::{.callout-warning}
+Be careful: everyday English is less precise than logic. You might say:
+
+> I want all subjects with age over 50 and all subjects that like cats.
+
+But in logic this means:
+
+`(subject age over 50) OR (subject likes cats)`
+
+So think carefully about whether you need both conditions to be true (AND) or
+at least one (OR).
+:::
+
+:::{.callout-note title="Short-circuit Operators" collapse="true"}
+The second argument is irrelevant in some conditions:
+
+* `FALSE &` is always `FALSE`
+* `TRUE |` is always `TRUE`
+
+Now imagine you have `FALSE & long_computation()`. You can save time by
+skipping `long_computation()`. A **short-circuit operator** does exactly that.
+
+R has two short-circuit operators:
+
+* `&&` is a short-circuited `&`
+* `||` is a short-circuited `|`
+
+These operators only evaluate the second argument if it is necessary to
+determine the result. Here are some of these:
+
+```{r}
+TRUE && FALSE
+TRUE && TRUE
+TRUE || TRUE
+```
+
+The short-circuit operators are not vectorized---they only accept length-1
+arguments:
+
+```{r, error = TRUE}
+c(TRUE, FALSE) && c(TRUE, TRUE)
+```
+
+Because of this, you can't use short-circuit operators for indexing. Their main
+use is in writing conditions for if-expressions, which we'll learn about later
+on.
+
+Prior to R 4.3.0, short-circuit operators didn't raise an error for inputs with
+length greater than 1 (and thus were a common source of bugs).
+:::
+
+:::{.callout-note title="Exclusive OR" collapse="true"}
+Rarely, you might want _exactly one_ condition to be true. The **XOR (eXclusive
+OR) function** `xor()` returns `TRUE` when exactly one argument is `TRUE`. For
+example:
+
+```{r}
+xor(FALSE, FALSE)
+xor(TRUE, FALSE)
+xor(TRUE, TRUE)
+```
+:::
+
+
+## Exercises
+
+
+### Exercise
+
+The `rep` function is another way to create a vector. Read the help file for
+the `rep` function.
+
+1. What does the `rep` function do to create a vector? Give an example.
+2. The `rep` function has parameters `times` and `each`. What does each do, and
+   how do they differ? Give examples for both.
+3. Can you set both of `times` and `each` in a single call to `rep`? If the
+   function raises an error, explain what the error message means. If the
+   function returns a result, explain how the result corresponds to the
+   arguments you chose.
+
+
+### Exercise
+
+1.  Create a new data frame from the least terns data with the following
+    characteristics:
+      * Each entry's year is between 2010 and 2019 (inclusive).
+      * Each entry reports at least 100 breeding pairs.
+      * The columns are `year`, `site_name`, `bp_min`, `bp_max`,
+        `total_nests`.
+
+    Use this data frame for the remaining questions.
+
+2.  Count the number of entries for each site. How many sites have at least 100
+    breeding pairs across all 10 years?
+
+3.  Which site-year combination has the highest number of nests?

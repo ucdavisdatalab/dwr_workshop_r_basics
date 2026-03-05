@@ -14,14 +14,28 @@ book:
   date: now
   chapters:
     - "index.qmd"
-    - "chapters/01_getting-started.qmd"
-    - "chapters/02_data-structures.qmd"
-    - "chapters/03_exploring-data.qmd"
-    - "chapters/04_organizing_code.qmd"
-    - "chapters/05_appendix.qmd"
-    - "chapters/97_where-to-learn-more.qmd"
-    - "chapters/98_acknowledgements.qmd"
-    - "chapters/99_assessment.qmd"
+    - part: "Getting Started"
+      chapters:
+        - "chapters/getting-started/getting-started.qmd"
+        - "chapters/getting-started/working-with-files.qmd"
+    - part: "Exploring Data"
+      chapters:
+        - "chapters/exploring-data/indexing.qmd"
+        - "chapters/exploring-data/visualization.qmd"
+        - "chapters/exploring-data/grouping.qmd"
+    - part: "Data Types & Structures"
+      chapters:
+        - "chapters/data-types-structures/data-types-structures.qmd"
+    - part: "Organizing Code"
+      chapters:
+        - "chapters/organizing-code/writing-functions.qmd"
+        - "chapters/organizing-code/control-flow.qmd"
+  appendices:
+    - "chapters/appendices/file-systems.qmd"
+    - "chapters/appendices/appendix.qmd"
+    - "chapters/appendices/where-to-learn-more.qmd"
+    - "chapters/appendices/acknowledgements.qmd"
+    # - "chapters/appendices/assessment.qmd"
   repo-url: "https://github.com/ucdavisdatalab/workshop_r_basics"
   repo-actions: [issue, source]
   sidebar:
@@ -37,12 +51,15 @@ format:
       - text: |
           <style>
           .callout.callout-style-default .callout-body {
-            padding: 0 1.5rem .2rem;
+            padding: 0 1.5rem 0;
           }
           .cell-output-stdout {
             overflow-y: scroll;
             max-height: 30rem;
             margin-bottom: 0.75rem;
+          }
+          #quarto-sidebar a.text-start {
+            font-variant: small-caps;
           }
           </style>
   pdf: default

@@ -1,0 +1,178 @@
+```{r, echo = FALSE}
+terns = read.csv("data/2000-2023_ca_least_tern.csv")
+```
+
+# Aggregation & Grouping
+
+:::{.callout-note title="Learning Goals" collapse="false"}
+After this lesson, you should be able to:
+
+* Summarize columns by computing aggregates
+* Summarize groups by grouping data and computing aggregates
+* Explain the differences between dplyr's `summarize` and `mutate` functions
+:::
+
+:::{.callout-important title="Required Packages"}
+This chapter uses the following packages:
+
+* dplyr
+
+@sec-packages explains how to install and load packages.
+:::
+
+This chapter explains how to use the dplyr package to summarize columns and
+groups within data frames. This is a critical skill in data analysis, and a
+building block for more complicated methods.
+
+
+## Summarizing Columns
+
+@sec-working-with-files-selecting-columns showed how to compute the range and
+mean of a column with R's built-in `range` and `mean` functions. These
+functions summarize or **aggregate** the elements in the column, reducing them
+to a smaller number of values (usually one). For example, suppose we want to
+compute the median number of predator-related egg mortalities across all sites
+and years in the least terns data. Then we can use the `median` function:
+
+```{r}
+median(terns$pred_eggs, na.rm = TRUE)
+```
+
+There are missing values in the column, so we have to set `na.rm = TRUE` to get
+a numerical result (@sec-missing-values explains more about missing values).
+
+The dplyr package provides functions to make it easier to summarize multiple
+columns. See the [documentation][dplyr] for a complete list. Perhaps the most
+useful is the `summarize` function. With `summarize`, the equivalent of the
+code above is:
+
+```{r}
+library("dplyr")
+
+summarize(terns, median(pred_eggs, na.rm = TRUE))
+```
+
+As you can see, the code is actually a bit longer! The `summarize` function is
+most useful when you want to summarize multiple columns, because you can select
+the columns in all of the same ways as with the `select` function. For example,
+suppose we want the medians for columns `bp_min`, `bp_max`, `fl_min`, and
+`fl_max`:
+
+```{r}
+summarize(
+  terns,
+  med_bp_min = median(bp_min, na.rm = TRUE),
+  med_bp_max = median(bp_max, na.rm = TRUE),
+  med_fl_min = median(fl_min, na.rm = TRUE),
+  med_fl_max = median(fl_max, na.rm = TRUE)
+)
+```
+
+Notice that you can set the names of the columns in the resulting data frame
+through the parameter names (such as `med_bp_min`) in the call to `summarize`.
+
+
+## Summarizing Groups
+
+Categorical columns are useful for dividing observations into groups. You can
+use dplyr's `group_by` function to group rows in a data frame by one or more
+columns.
+
+To demonstrate the `group_by` function, let's compute the median number of
+nests by region for the least terns data. We'll use the `region_3` column.
+After grouping with `group_by`, you can use the `summarize` function to compute
+summaries of columns, and dplyr will compute a separate result for each group:
+
+```{r}
+by_region = group_by(terns, region_3)
+summarize(by_region, median(total_nests, na.rm = TRUE))
+```
+
+The `summarize` function can compute grouped summaries for multiple columns.
+For example, suppose we also want the median number of breeding pairs, and want
+to compute the maximum for both features as well. We can use parameter names to
+give each summary statistic a unique, easy-to-type name:
+
+```{r}
+summarize(
+  by_region,
+  med_total_nests = median(total_nests, na.rm = TRUE),
+  med_bp_max = median(bp_max, na.rm = TRUE),
+  max_total_nests = max(total_nests, na.rm = TRUE),
+  max_bp_max = max(bp_max, na.rm = TRUE)
+)
+```
+
+Some dplyr functions only make sense when used with grouping. One is the `n`
+function, which returns the number of rows in a group. For example, one way to
+find all year and climate event combinations present in the least terns data is
+to run:
+
+```{r}
+summarize(
+  group_by(terns, year, event),
+  n()
+)
+```
+
+From this result we can conclude that there is only one climate event for each
+year in the dataset.
+
+
+## Mutating Groups
+
+For tasks like standardizing features on a per-group basis, it's necessary to
+compute summaries on groups and then map them back to the original
+observations. Use the `mutate` function for this rather than `summarize`. For
+example, to compute mean total nests for each year:
+
+```{r}
+by_year = group_by(terns, year)
+mutate(
+  by_year,
+  year,
+  mean_total_nests = mean(total_nests, na.rm = TRUE),
+  # Keep only the mentioned columns, to make the result easier to see.
+  .keep = "used"
+)
+```
+
+The `mutate` function returns a data frame with the same number of rows as the
+original data frame, unlike the `summarize` function, which returns a data
+frame with the same number of rows as there are groups.
+
+:::{.callout-tip}
+Use `summarize` if you want to compute grouped aggregates on their own. For
+example, you might use these as a summary, to make a visualization, or to use
+in further computations that are not on the original data frame.
+
+Use `mutate` if you want to compute grouped aggregates matched to the rows of
+the original data frame.
+:::
+
+
+## Exercises
+
+
+### Exercise
+
+1. Compute the total number of fledglings (with `fl_min`) for each year and
+   region combination.
+2. Another way to present the data in @sec-example-bar-plot is with a line
+   plot. Use the result from part 1 to make this plot with points for each
+   total and lines connecting the totals. Hint: find the appropriate geometries
+   in the ggplot2 documentation.
+
+
+### Exercise
+
+1. Compute the number of sites with no egg mortalities due to predation.
+2. Of those, how many had at least one fledgling?
+
+
+### Exercise
+
+1. Compute the range (minimum and maximum) of `year` for each site.
+2. How many many sites have observations over the entire range of the dataset
+   (2000 and 2004-2023)? Hint: use `unique` and `length` to find the number of
+   unique years for each site.

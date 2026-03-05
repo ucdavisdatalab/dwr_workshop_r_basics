@@ -39,7 +39,7 @@ book:
   repo-url: "https://github.com/ucdavisdatalab/workshop_r_basics"
   repo-actions: [issue, source]
   sidebar:
-    logo: "images/datalab-logo-full-color-rgb-1.png"
+    logo: "/images/datalab-logo-full-color-rgb.png"
     logo-alt: "The logo of the UC Davis DataLab."
     logo-href: "https://datalab.ucdavis.edu/"
 
